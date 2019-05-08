@@ -28,12 +28,19 @@ class Program:
     """
     instLengths = [1,3,5,23]
 
-    def __init__(self, program=None, progSize=maxProgSize, genCreate=0):
-        if program is not None:
+    def __init__(self, program=None, progSize=Program.maxProgSize, genCreate=0):
+        if program is not None: # copy existing program (probably to be mutated)
             self.instructions = list(program.instructions)
-        else:
-            instSize = 1+
-            self.instructions = [random.randint(0,5) for _ in range(10)]
+        else: # create brand new program, all new instructions
+            self.instructions = [random.randint(0,2**sum(Program.instLengths)-1)
+                                 for _ in range(progSize)]
+
+        # give a new id
+        self.id = Program.idCount
+        Program.idCount += 1
+
+        self.genCreate = genCreate
+
 
     def run(input, regs, modes, ops, dsts, srcs, regSize):
         pass
@@ -44,9 +51,10 @@ class Program:
     def mutate(self, pAdd=1, pDel=1, pSwp=1, pMut=1):
         pass
 
-    def setInstructionBitLengths(lMode=instLengths[0], lOp=instLengths[1],
-            lDest=instLengths[2], lSrc=instLengths[3]):
-        instLengths[0] = lMode
-        instLengths[1] = lOp
-        instLengths[2] = lDest
-        instLengths[3] = lSrc
+    def setInstructionBitLengths(lMode=Program.instLengths[0],
+            lOp=Program.instLengths[1], lDest=Program.instLengths[2],
+            lSrc=Program.instLengths[3]):
+        Program.instLengths[0] = lMode
+        Program.instLengths[1] = lOp
+        Program.instLengths[2] = lDest
+        Program.instLengths[3] = lSrc
