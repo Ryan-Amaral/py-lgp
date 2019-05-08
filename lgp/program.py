@@ -1,4 +1,7 @@
 import random
+import numpy as np
+from numba import njit
+import math
 
 """
 A program which contains multiple instructions, each of which performing some
@@ -41,9 +44,49 @@ class Program:
 
         self.genCreate = genCreate
 
+        # initialize registers
+        self.registers = np.zeros(numOutRegs+numMemRegs+numFgtRegs)
 
+    @njit
     def run(input, regs, modes, ops, dsts, srcs, regSize):
-        pass
+        for i in range(len(modes)):
+        # first get source
+        if modes[i] == False:
+            src = registers[srcs[i]%regSize]
+        else:
+            src = input[srcs[i]%len(input)]
+
+        # do operation
+        op = ops[i]
+        x = registers[dsts[i]]
+        y = src
+        dest = dsts[i]%regSize
+        if op == 0:
+            registers[dest] = x+y
+        elif op == 1:
+            registers[dest] = x-y
+        elif op == 2:
+            registers[dest] = x*y
+        elif op == 3:
+            if y != 0:
+                registers[dest] = x/y
+        elif op == 4:
+            registers[dest] = math.cos(y)
+        elif op == 5:
+            if y > 0:
+                registers[dest] = math.log(y)
+        elif op == 6:
+            registers[dest] = math.exp(y)
+        elif op == 7:
+            if x < y:
+                registers[dest] = x*(-1)
+
+        if math.isnan(registers[dest]):
+            registers[dest] = 0
+        elif registers[dest] == np.inf:
+            registers[dest] = np.finfo(np.float64).max
+        elif registers[dest] == np.NINF:
+            registers[dest] = np.finfo(np.float64).min
 
     def getAction(self, obs):
         pass
@@ -57,7 +100,7 @@ class Program:
             self.instructions.insert(
                 random.randint(0, len(self.instructions)-1),
                 random.randint(0,2**sum(Program.instLengths)-1))
-                
+
             changed = True
 
         # delete instruction maybe
