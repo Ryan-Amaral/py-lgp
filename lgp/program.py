@@ -47,6 +47,9 @@ class Program:
         # initialize registers
         self.registers = np.zeros(numOutRegs+numMemRegs+numFgtRegs)
 
+        # store instructions in a way for fast execution
+        self.extractInstructionsData()
+
     @njit
     def run(input, regs, modes, ops, dsts, srcs, regSize):
         for i in range(len(modes)):
@@ -136,7 +139,25 @@ class Program:
 
             changed = True
 
+        # update data
+        self.extractInstructionsData()
+
         return changed
+
+    def extractInstructionsData(self):
+        instsData = np.array([
+            [
+                getIntSegment(inst, 0, Program.instLengths[0]),
+                getIntSegment(inst, Program.instLengths[:1], Program.instLengths[1]),
+                getIntSegment(inst, sum(Program.instLengths[:2]), Program.instLengths[2]),
+                getIntSegment(inst, sum(Program.instLengths[:3]), Program.instLengths[3])
+            ]
+            for inst in self.instructions])
+
+        self.modes = np.array(progData[:,0], dtype = bool)
+        self.ops = np.array(progData[:,1], dtype = np.int8)
+        self.dests = np.array(progData[:,2], dtype = np.int8)
+        self.srcs = np.array(progData[:,3], dtype = np.int32)
 
     def setInstructionBitLengths(lMode=Program.instLengths[0],
             lOp=Program.instLengths[1], lDest=Program.instLengths[2],
@@ -145,3 +166,9 @@ class Program:
         Program.instLengths[1] = lOp
         Program.instLengths[2] = lDest
         Program.instLengths[3] = lSrc
+
+def getIntSegment(num, bitStart, bitLen):
+    bitStart += 2 # offset for '0b'
+    binStr = bin(num)
+
+    return int(bin(num)[bitStart:bitStart+bitLen], 2)
