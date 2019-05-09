@@ -38,7 +38,8 @@ class Program:
         if program is not None: # copy existing program (probably to be mutated)
             self.instructions = list(program.instructions)
         else: # create brand new program, all new instructions
-            self.instructions = [random.randint(0,2**sum(Program.instLengths)-1)
+            Program.maxInst = 2**sum(Program.instLengths)-1
+            self.instructions = [random.randint(0,Program.maxInst)
                                  for _ in range(progSize)]
 
         # give a new id
@@ -101,7 +102,7 @@ class Program:
             idx = random.randint(0, len(self.instructions)-1)
             inst = bin(self.instructions[idx]) # get binary rep
             # flip a random bit
-            bit = random.randint(2, len(inst)-1)
+            bit = random.randint(2, len(inst)-1) # start at 2 for '0b' prefix
             if inst[bit] == '0':
                 self.instructions[idx] = int(inst[:bit] + '1' + inst[bit+1:], 2)
             else:
@@ -118,7 +119,7 @@ class Program:
         instsData = np.array([
             [
                 getIntSegment(inst, 0, Program.instLengths[0]),
-                getIntSegment(inst, Program.instLengths[1],
+                getIntSegment(inst, Program.instLengths[0],
                         Program.instLengths[1]),
                 getIntSegment(inst, sum(Program.instLengths[:2]),
                         Program.instLengths[2]),
@@ -148,10 +149,8 @@ class Program:
         Program.instLengths[3] = lSrc
 
 def getIntSegment(num, bitStart, bitLen):
-    bitStart += 2 # offset for '0b'
-    binStr = bin(num)
-
-    return int(bin(num)[bitStart:bitStart+bitLen], 2)
+    binStr = format(num, 'b').zfill(sum(Program.instLengths))
+    return int(binStr[bitStart:bitStart+bitLen], 2)
 
 #@njit
 def run(inpt, regs, modes, ops, dsts, srcs):
