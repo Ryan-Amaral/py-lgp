@@ -11,7 +11,7 @@ class Program:
     maxProgSize = 128
 
     numOutRegs = 8 # registers that are mapped to outputs after running
-    numMemRegs = 8 # registers that aren't cleared after a run
+    numMemRegs = 16 # registers that aren't cleared after a run
     numFgtRegs = 8 # registers that are cleared after each run
 
     idCount = 0 # unique numeric id of program, incrementing on each new one
@@ -31,7 +31,10 @@ class Program:
     """
     instLengths = [1,3,5,23]
 
-    def __init__(self, program=None, progSize=Program.maxProgSize, genCreate=0):
+    def __init__(self, program=None, progSize=-1, genCreate=0):
+        if progSize == -1:
+            progSize = Program.maxProgSize
+
         if program is not None: # copy existing program (probably to be mutated)
             self.instructions = list(program.instructions)
         else: # create brand new program, all new instructions
@@ -45,54 +48,21 @@ class Program:
         self.genCreate = genCreate
 
         # initialize registers
-        self.registers = np.zeros(numOutRegs+numMemRegs+numFgtRegs)
+        self.registers = np.zeros(Program.numOutRegs+Program.numMemRegs+
+                Program.numFgtRegs)
 
         # store instructions in a way for fast execution
         self.extractInstructionsData()
 
-    @njit
-    def run(input, regs, modes, ops, dsts, srcs, regSize):
-        for i in range(len(modes)):
-        # first get source
-        if modes[i] == False:
-            src = registers[srcs[i]%regSize]
-        else:
-            src = input[srcs[i]%len(input)]
-
-        # do operation
-        op = ops[i]
-        x = registers[dsts[i]]
-        y = src
-        dest = dsts[i]%regSize
-        if op == 0:
-            registers[dest] = x+y
-        elif op == 1:
-            registers[dest] = x-y
-        elif op == 2:
-            registers[dest] = x*y
-        elif op == 3:
-            if y != 0:
-                registers[dest] = x/y
-        elif op == 4:
-            registers[dest] = math.cos(y)
-        elif op == 5:
-            if y > 0:
-                registers[dest] = math.log(y)
-        elif op == 6:
-            registers[dest] = math.exp(y)
-        elif op == 7:
-            if x < y:
-                registers[dest] = x*(-1)
-
-        if math.isnan(registers[dest]):
-            registers[dest] = 0
-        elif registers[dest] == np.inf:
-            registers[dest] = np.finfo(np.float64).max
-        elif registers[dest] == np.NINF:
-            registers[dest] = np.finfo(np.float64).min
-
     def getAction(self, obs):
-        pass
+        # reset fgt registers
+        for i in range(Program.numFgtRegs):
+            self.registers[Program.numOutRegs+Program.numMemRegs+i] = 0
+
+        run(obs, self.registers,
+                self.modes, self.ops, self.dests, self.srcs)
+
+        return self.registers[:Program.numOutRegs]
 
     def mutate(self, pAdd=1, pDel=1, pSwp=1, pMut=1):
         changed = False # track if change was made
@@ -133,9 +103,9 @@ class Program:
             # flip a random bit
             bit = random.randint(2, len(inst)-1)
             if inst[bit] == '0':
-                self.instructions[idx] = int(inst[:bit] + '1' + inst[bit+1:])
+                self.instructions[idx] = int(inst[:bit] + '1' + inst[bit+1:], 2)
             else:
-                self.instructions[idx] = int(inst[:bit] + '0' + inst[bit+1:])
+                self.instructions[idx] = int(inst[:bit] + '0' + inst[bit+1:], 2)
 
             changed = True
 
@@ -148,20 +118,30 @@ class Program:
         instsData = np.array([
             [
                 getIntSegment(inst, 0, Program.instLengths[0]),
-                getIntSegment(inst, Program.instLengths[:1], Program.instLengths[1]),
-                getIntSegment(inst, sum(Program.instLengths[:2]), Program.instLengths[2]),
-                getIntSegment(inst, sum(Program.instLengths[:3]), Program.instLengths[3])
+                getIntSegment(inst, Program.instLengths[1],
+                        Program.instLengths[1]),
+                getIntSegment(inst, sum(Program.instLengths[:2]),
+                        Program.instLengths[2]),
+                getIntSegment(inst, sum(Program.instLengths[:3]),
+                        Program.instLengths[3])
             ]
             for inst in self.instructions])
 
-        self.modes = np.array(progData[:,0], dtype = bool)
-        self.ops = np.array(progData[:,1], dtype = np.int8)
-        self.dests = np.array(progData[:,2], dtype = np.int8)
-        self.srcs = np.array(progData[:,3], dtype = np.int32)
+        self.modes = np.array(instsData[:,0], dtype = bool)
+        self.ops = np.array(instsData[:,1], dtype = np.int8)
+        self.dests = np.array(instsData[:,2], dtype = np.int8)
+        self.srcs = np.array(instsData[:,3], dtype = np.int32)
 
-    def setInstructionBitLengths(lMode=Program.instLengths[0],
-            lOp=Program.instLengths[1], lDest=Program.instLengths[2],
-            lSrc=Program.instLengths[3]):
+    def setInstructionBitLengths(lMode=-1, lOp=-1, lDest=-1, lSrc=-1):
+        if lMode == -1:
+            lMode = Program.instLengths[0]
+        if lOp == -1:
+            lOp = Program.instLengths[1]
+        if lDest == -1:
+            lDest = Program.instLengths[2]
+        if lSrc == -1:
+            lSrc = Program.instLengths[3]
+
         Program.instLengths[0] = lMode
         Program.instLengths[1] = lOp
         Program.instLengths[2] = lDest
@@ -172,3 +152,46 @@ def getIntSegment(num, bitStart, bitLen):
     binStr = bin(num)
 
     return int(bin(num)[bitStart:bitStart+bitLen], 2)
+
+#@njit
+def run(inpt, regs, modes, ops, dsts, srcs):
+    regSize = len(regs)
+    inptLen = len(inpt)
+    for i in range(len(modes)):
+        # first get source
+        if modes[i] == False:
+            src = regs[srcs[i]%regSize]
+        else:
+            src = inpt[srcs[i]%inptLen]
+
+        # do operation
+        op = ops[i]
+        x = regs[dsts[i]]
+        y = src
+        dest = dsts[i]%regSize
+        if op == 0:
+            regs[dest] = x+y
+        elif op == 1:
+            regs[dest] = x-y
+        elif op == 2:
+            regs[dest] = x*y
+        elif op == 3:
+            if y != 0:
+                regs[dest] = x/y
+        elif op == 4:
+            regs[dest] = math.cos(y)
+        elif op == 5:
+            if y > 0:
+                regs[dest] = math.log(y)
+        elif op == 6:
+            regs[dest] = math.exp(y)
+        elif op == 7:
+            if x < y:
+                regs[dest] = x*(-1)
+
+        if math.isnan(regs[dest]):
+            regs[dest] = 0
+        elif regs[dest] == np.inf:
+            regs[dest] = np.finfo(np.float64).max
+        elif regs[dest] == np.NINF:
+            regs[dest] = np.finfo(np.float64).min
