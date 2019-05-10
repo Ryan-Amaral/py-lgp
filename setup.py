@@ -4,6 +4,7 @@ setup(
     name='py-lgp',
     version='0.0',
     packages=['lgp'],
+    install_requires=['numba','numpy'],
     license='MIT',
     description='Python implementation of Linear Genetic Programming.',
     long_description=open('README.md').read(),
