@@ -55,6 +55,10 @@ class Program:
         # store instructions in a way for fast execution
         self.extractInstructionsData()
 
+        self.outcomes = {} # stores rewards for tasks
+
+        self.fitness = None
+
     def getAction(self, obs):
         # reset fgt registers
         for i in range(Program.numFgtRegs):
@@ -115,7 +119,7 @@ class Program:
 
         return changed
 
-    def extractInstructionsData(self):
+    def extractInstructionsData(self): # for efficiency in running
         instsData = np.array([
             [
                 getIntSegment(inst, 0, Program.instLengths[0]),
@@ -147,6 +151,9 @@ class Program:
         Program.instLengths[1] = lOp
         Program.instLengths[2] = lDest
         Program.instLengths[3] = lSrc
+
+    def reward(self, task, score):
+        self.outcomes[task] = score
 
 def getIntSegment(num, bitStart, bitLen):
     binStr = format(num, 'b').zfill(sum(Program.instLengths))
