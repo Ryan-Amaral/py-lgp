@@ -75,8 +75,18 @@ class Trainer:
         parents = list(self.programs)
         # generate this many new ones
         for i in range(self.popSize - len(self.programs)):
-            newProg = Program(program=random.choice(parents),
-                              genCreate=self.curGen)
+            p1,p2 = random.sample(self.programs, 2)
+            crsPt = random.randint(0,
+                    min(len(p1.instructions), len(p2.instructions))-1)
+
+            newProg = Program(genCreate=self.curGen)
+            newProg.instructions = (p1.instructions[:crsPt] +
+                                    p2.instructions[crsPt:])
+            newProg.extractInstructionsData()
+
+            #newProg = Program(program=random.choice(parents),
+            #                  genCreate=self.curGen)
             while not newProg.mutate():
                 continue
+
             self.programs.append(newProg)
