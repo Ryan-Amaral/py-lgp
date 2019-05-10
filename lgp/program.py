@@ -11,7 +11,7 @@ class Program:
     maxProgSize = 128
 
     numOutRegs = 8 # registers that are mapped to outputs after running
-    numMemRegs = 16 # registers that aren't cleared after a run
+    numMemRegs = 8 # registers that aren't cleared after a run
     numFgtRegs = 8 # registers that are cleared after each run
 
     # probabilities for various program mutations
@@ -65,7 +65,12 @@ class Program:
 
         self.fitness = None
 
-    def getAction(self, obs):
+    """
+    Produces an action based on the observation and state of registers.
+    actionType 'single' returns the index of the max output register, 'multi'
+    returns all output registers.
+    """
+    def getAction(self, obs, actionType='multi'):
         # reset fgt registers
         for i in range(Program.numFgtRegs):
             self.registers[Program.numOutRegs+Program.numMemRegs+i] = 0
@@ -73,7 +78,10 @@ class Program:
         run(obs, self.registers,
                 self.modes, self.ops, self.dests, self.srcs)
 
-        return self.registers[:Program.numOutRegs]
+        if actionType == 'multi':
+            return self.registers[:Program.numOutRegs]
+        else:
+            return np.argmax(self.registers[:Program.numOutRegs])
 
     def mutate(self, pAdd=-1, pDel=-1, pSwp=-1, pMut=-1):
         if pAdd == -1:
@@ -174,7 +182,7 @@ def getIntSegment(num, bitStart, bitLen):
     binStr = format(num, 'b').zfill(sum(Program.instLengths))
     return int(binStr[bitStart:bitStart+bitLen], 2)
 
-#@njit
+@njit
 def run(inpt, regs, modes, ops, dsts, srcs):
     regSize = len(regs)
     inptLen = len(inpt)

@@ -1,5 +1,5 @@
 import random
-from program import Program
+from lgp.program import Program
 
 """
 Creates and maintains a population of programs.
@@ -7,7 +7,7 @@ Creates and maintains a population of programs.
 class Trainer:
 
     def __init__(self, numActions, popSize=200, gap=0.5, maxProgSize=128,
-            numMemRegs=16, numFgtRegs=8,
+            numMemRegs=8, numFgtRegs=8,
             pInstAdd=1, pInstDel=1, pInstSwp=1, pInstMut=1, pProgMut=1):
 
         self.popSize = popSize
@@ -47,6 +47,16 @@ class Trainer:
             else: # multi task
                 pass # implement later when needed
 
+    def applyScores(self, scores):
+        for score in scores:
+            for program in self.programs:
+                if score[0] == program.id:
+                    for task, outcome in score[1].items():
+                        program.outcomes[task] = outcome
+                    break # on to next score
+
+        return self.programs
+
     def evolve(self, tasks, fitType='min'):
         self.select(tasks, fitType)
         self.generate()
@@ -62,9 +72,11 @@ class Trainer:
             pass
 
     def generate(self):
+        parents = list(self.programs)
         # generate this many new ones
         for i in range(self.popSize - len(self.programs)):
-            # for now just create randoms for testing
-            self.programs.append(
-                    Program(progSize=random.randint(1, Program.maxProgSize),
-                            genCreate=self.curGen))
+            newProg = Program(program=random.choice(parents),
+                              genCreate=self.curGen)
+            while not newProg.mutate():
+                continue
+            self.programs.append(newProg)
