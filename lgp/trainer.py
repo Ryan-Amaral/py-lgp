@@ -27,8 +27,8 @@ class Trainer:
         self.initPop()
 
     def initPop(self):
-        self.programs = [Program(progSize=random.randint(1,self.maxProgSize),
-                                 getCreate=self.curGen)
+        self.programs = [Program(progSize=random.randint(1,Program.maxProgSize),
+                                 genCreate=self.curGen)
                         for _ in range(self.popSize)]
 
     """
@@ -66,5 +66,5 @@ class Trainer:
         for i in range(self.popSize - len(self.programs)):
             # for now just create randoms for testing
             self.programs.append(
-                    Program(progSize=random.randint(1,self.maxProgSize),
-                            getCreate=self.curGen))
+                    Program(progSize=random.randint(1, Program.maxProgSize),
+                            genCreate=self.curGen))
