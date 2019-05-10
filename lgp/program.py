@@ -14,6 +14,12 @@ class Program:
     numMemRegs = 16 # registers that aren't cleared after a run
     numFgtRegs = 8 # registers that are cleared after each run
 
+    # probabilities for various program mutations
+    pInstAdd = 1
+    pInstDel = 1
+    pInstSwp = 1
+    pInstMut = 1
+
     idCount = 0 # unique numeric id of program, incrementing on each new one
 
     """
@@ -69,7 +75,16 @@ class Program:
 
         return self.registers[:Program.numOutRegs]
 
-    def mutate(self, pAdd=1, pDel=1, pSwp=1, pMut=1):
+    def mutate(self, pAdd=-1, pDel=-1, pSwp=-1, pMut=-1):
+        if pAdd == -1:
+            pAdd = Program.pInstAdd
+        if pDel == -1:
+            pDel = Program.pInstDel
+        if pSwp == -1:
+            pSwp = Program.pInstSwp
+        if pMut == -1:
+            pMut = Program.pInstMut
+
         changed = False # track if change was made
 
         # add instruction maybe

@@ -1,4 +1,5 @@
 import random
+from program import Program
 
 """
 Creates and maintains a population of programs.
@@ -10,11 +11,25 @@ class Trainer:
             pInstAdd=1, pInstDel=1, pInstSwp=1, pInstMut=1, pProgMut=1):
 
         self.popSize = popSize
+        self.gap = gap
+
+        Program.maxProgSize = maxProgSize
+        Program.numOutRegs = numOutRegs
+        Program.numMemRegs = numMemRegs
+        Program.numFgtRegs = numFgtRegs
+        Program.pInstAdd = pInstAdd
+        Program.pInstDel = pInstDel
+        Program.pInstSwp = pInstSwp
+        Program.pInstMut = pInstMut
+
+        self.curGen = 0
+
         self.initPop()
 
     def initPop(self):
-        self.programs = [Program(progSize=random.randint(1,self.maxProgSize))
-                for _ in range(self.popSize)]
+        self.programs = [Program(progSize=random.randint(1,self.maxProgSize),
+                                 getCreate=self.curGen)
+                        for _ in range(self.popSize)]
 
     """
     Returns all of the agents/programs. Sorted arbitrarilly unless tasks are
@@ -31,8 +46,9 @@ class Trainer:
             else: # multi task
                 pass # implement later when needed
 
-    def evolve(self):
-        pass
+    def evolve(self, tasks, fitType='min', ):
+        self.select()
+        self.generate()
 
     def select(self):
         pass
