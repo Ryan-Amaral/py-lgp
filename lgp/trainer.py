@@ -8,7 +8,7 @@ class Trainer:
 
     def __init__(self, numActions, popSize=200, gap=0.5, maxProgSize=128,
             numMemRegs=8, numFgtRegs=8,
-            pInstAdd=1, pInstDel=1, pInstSwp=1, pInstMut=1, pProgMut=1):
+            pInstAdd=0.2, pInstDel=0.2, pInstSwp=0.2, pInstMut=0.2, pProgMut=1):
 
         self.popSize = popSize
         self.gap = gap
@@ -84,7 +84,7 @@ class Trainer:
             newProg = Program(genCreate=self.curGen)
             newProg.instructions = (p1.instructions[:crsPt] +
                                     p2.instructions[crsPt:])
-            newProg.extractInstructionsData()
+            #newProg.extractInstructionsData()
 
             #newProg = Program(program=random.choice(parents),
             #                  genCreate=self.curGen)
