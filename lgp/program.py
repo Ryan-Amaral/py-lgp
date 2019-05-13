@@ -72,8 +72,7 @@ class Program:
     """
     def getAction(self, obs, actionType='multi'):
         # reset fgt registers
-        for i in range(Program.numFgtRegs):
-            self.registers[Program.numOutRegs+Program.numMemRegs+i] = 0
+        self.clearRegisters(clearAll=False)
 
         run(obs, self.registers,
                 self.modes, self.ops, self.dests, self.srcs)
@@ -82,6 +81,15 @@ class Program:
             return self.registers[:Program.numOutRegs]
         else:
             return np.argmax(self.registers[:Program.numOutRegs])
+
+    def clearRegisters(self, clearAll=True):
+        if clearAll:
+            self.registers = np.zeros(Program.numOutRegs+Program.numMemRegs+
+                    Program.numFgtRegs)
+        else:
+            # reset fgt registers
+            for i in range(Program.numFgtRegs):
+                self.registers[Program.numOutRegs+Program.numMemRegs+i] = 0
 
     def mutate(self, pAdd=-1, pDel=-1, pSwp=-1, pMut=-1):
         if pAdd == -1:

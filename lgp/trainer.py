@@ -61,6 +61,8 @@ class Trainer:
         self.select(tasks, fitType)
         self.generate()
         self.curGen += 1
+        for program in self.programs:
+            program.clearRegisters()
 
     def select(self, tasks, fitType):
         numKeep = self.popSize - int(self.popSize * self.gap) # agents to keep
