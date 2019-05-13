@@ -74,7 +74,7 @@ class Program:
         # reset fgt registers
         self.clearRegisters(clearAll=False)
 
-        run(obs, self.registers,
+        Program.run(obs, self.registers,
                 self.modes, self.ops, self.dests, self.srcs)
 
         if actionType == 'multi':
@@ -150,15 +150,18 @@ class Program:
 
         return changed
 
+    def reward(self, task, score):
+        self.outcomes[task] = score
+
     def extractInstructionsData(self): # for efficiency in running
         instsData = np.array([
             [
-                getIntSegment(inst, 0, Program.instLengths[0]),
-                getIntSegment(inst, Program.instLengths[0],
+                Program.getIntSegment(inst, 0, Program.instLengths[0]),
+                Program.getIntSegment(inst, Program.instLengths[0],
                         Program.instLengths[1]),
-                getIntSegment(inst, sum(Program.instLengths[:2]),
+                Program.getIntSegment(inst, sum(Program.instLengths[:2]),
                         Program.instLengths[2]),
-                getIntSegment(inst, sum(Program.instLengths[:3]),
+                Program.getIntSegment(inst, sum(Program.instLengths[:3]),
                         Program.instLengths[3])
             ]
             for inst in self.instructions])
@@ -183,52 +186,49 @@ class Program:
         Program.instLengths[2] = lDest
         Program.instLengths[3] = lSrc
 
-    def reward(self, task, score):
-        self.outcomes[task] = score
+    def getIntSegment(num, bitStart, bitLen):
+        binStr = format(num, 'b').zfill(sum(Program.instLengths))
+        return int(binStr[bitStart:bitStart+bitLen], 2)
 
-def getIntSegment(num, bitStart, bitLen):
-    binStr = format(num, 'b').zfill(sum(Program.instLengths))
-    return int(binStr[bitStart:bitStart+bitLen], 2)
+    @njit
+    def run(inpt, regs, modes, ops, dsts, srcs):
+        regSize = len(regs)
+        inptLen = len(inpt)
+        for i in range(len(modes)):
+            # first get source
+            if modes[i] == False:
+                src = regs[srcs[i]%regSize]
+            else:
+                src = inpt[srcs[i]%inptLen]
 
-@njit
-def run(inpt, regs, modes, ops, dsts, srcs):
-    regSize = len(regs)
-    inptLen = len(inpt)
-    for i in range(len(modes)):
-        # first get source
-        if modes[i] == False:
-            src = regs[srcs[i]%regSize]
-        else:
-            src = inpt[srcs[i]%inptLen]
+            # do operation
+            op = ops[i]
+            x = regs[dsts[i]]
+            y = src
+            dest = dsts[i]%regSize
+            if op == 0:
+                regs[dest] = x+y
+            elif op == 1:
+                regs[dest] = x-y
+            elif op == 2:
+                regs[dest] = x*y
+            elif op == 3:
+                if y != 0:
+                    regs[dest] = x/y
+            elif op == 4:
+                regs[dest] = math.cos(y)
+            elif op == 5:
+                if y > 0:
+                    regs[dest] = math.log(y)
+            elif op == 6:
+                regs[dest] = math.exp(y)
+            elif op == 7:
+                if x < y:
+                    regs[dest] = x*(-1)
 
-        # do operation
-        op = ops[i]
-        x = regs[dsts[i]]
-        y = src
-        dest = dsts[i]%regSize
-        if op == 0:
-            regs[dest] = x+y
-        elif op == 1:
-            regs[dest] = x-y
-        elif op == 2:
-            regs[dest] = x*y
-        elif op == 3:
-            if y != 0:
-                regs[dest] = x/y
-        elif op == 4:
-            regs[dest] = math.cos(y)
-        elif op == 5:
-            if y > 0:
-                regs[dest] = math.log(y)
-        elif op == 6:
-            regs[dest] = math.exp(y)
-        elif op == 7:
-            if x < y:
-                regs[dest] = x*(-1)
-
-        if math.isnan(regs[dest]):
-            regs[dest] = 0
-        elif regs[dest] == np.inf:
-            regs[dest] = np.finfo(np.float64).max
-        elif regs[dest] == np.NINF:
-            regs[dest] = np.finfo(np.float64).min
+            if math.isnan(regs[dest]):
+                regs[dest] = 0
+            elif regs[dest] == np.inf:
+                regs[dest] = np.finfo(np.float64).max
+            elif regs[dest] == np.NINF:
+                regs[dest] = np.finfo(np.float64).min
