@@ -47,7 +47,7 @@ class Trainer:
             else: # multi task
                 pass # implement later when needed
 
-    def applyScores(self, scores):
+    def applyScores(self, scores): # used when multiprocessing
         for score in scores:
             for program in self.programs:
                 if score[0] == program.id:
@@ -64,7 +64,7 @@ class Trainer:
         for program in self.programs:
             program.clearRegisters()
 
-    def select(self, tasks, fitType):
+    def select(self, tasks, fitType): # select programs to keep
         numKeep = self.popSize - int(self.popSize * self.gap) # agents to keep
         if isinstance(tasks, str): # single task
             self.programs = sorted(self.programs,
@@ -73,22 +73,25 @@ class Trainer:
         else: # multi task
             pass
 
-    def generate(self):
+    def generate(self): # generate new programs
         parents = list(self.programs)
         # generate this many new ones
-        for i in range(self.popSize - len(self.programs)):
-            p1,p2 = random.sample(self.programs, 2)
+        for i in range(int((self.popSize - len(self.programs))/2)):
+            p1,p2 = random.sample(parents, 2)
+            # crossover point
             crsPt = random.randint(0,
                     min(len(p1.instructions), len(p2.instructions))-1)
 
-            newProg = Program(genCreate=self.curGen)
-            newProg.instructions = (p1.instructions[:crsPt] +
+            newProg1 = Program(genCreate=self.curGen)
+            newProg2 = Program(genCreate=self.curGen)
+
+            newProg1.instructions = (p1.instructions[:crsPt] +
                                     p2.instructions[crsPt:])
-            #newProg.extractInstructionsData()
+            newProg2.instructions = (p2.instructions[:crsPt] +
+                                    p1.instructions[crsPt:])
 
-            #newProg = Program(program=random.choice(parents),
-            #                  genCreate=self.curGen)
-            while not newProg.mutate():
-                continue
+            newProg1.mutate()
+            newProg2.mutate()
 
-            self.programs.append(newProg)
+            self.programs.append(newProg1)
+            self.programs.append(newProg2)
