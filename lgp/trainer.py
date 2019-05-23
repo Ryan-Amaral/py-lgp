@@ -76,22 +76,9 @@ class Trainer:
     def generate(self): # generate new programs
         parents = list(self.programs)
         # generate this many new ones
-        for i in range(int((self.popSize - len(self.programs))/2)):
-            p1,p2 = random.sample(parents, 2)
-            # crossover point
-            crsPt = random.randint(0,
-                    min(len(p1.instructions), len(p2.instructions))-1)
-
-            newProg1 = Program(genCreate=self.curGen)
-            newProg2 = Program(genCreate=self.curGen)
-
-            newProg1.instructions = (p1.instructions[:crsPt] +
-                                    p2.instructions[crsPt:])
-            newProg2.instructions = (p2.instructions[:crsPt] +
-                                    p1.instructions[crsPt:])
-
-            newProg1.mutate()
-            newProg2.mutate()
-
-            self.programs.append(newProg1)
-            self.programs.append(newProg2)
+        for i in range((self.popSize - len(self.programs))):
+            p = random.choice(parents)
+            newProg = Program(genCreate=self.curGen)
+            newProg.instructions = list(p.instructions)
+            newProg.mutate()
+            self.programs.append(newProg)
