@@ -103,47 +103,57 @@ class Program:
 
         changed = False # track if change was made
 
-        # add instruction maybe
-        if(len(self.instructions) < Program.maxProgSize and
-                random.uniform(0,1) < pAdd):
-            self.instructions.insert(
-                random.randint(0, len(self.instructions)-1),
-                random.randint(0,2**sum(Program.instLengths)-1))
+        oLen = len(self.instructions) # to give all operators equal chances
 
-            changed = True
+        # Deleting
+        for i in range(oLen):
+            # delete instruction maybe
+            if(len(self.instructions) > 1 and
+                    random.uniform(0,1) < pDel):
+                del self.instructions[random.randint(0, len(self.instructions)-1)]
 
-        # delete instruction maybe
-        if(len(self.instructions) > 1 and
-                random.uniform(0,1) < pDel):
-            del self.instructions[random.randint(0, len(self.instructions)-1)]
+                changed = True
 
-            changed = True
-
-        # swap instructions maybe
-        if random.uniform(0,1) < pSwp:
-            idx1 = random.randint(0, len(self.instructions)-1)
-            idx2 = random.randint(0, len(self.instructions)-1)
-            while idx2 == idx1: # make sure different
+        # Swapping
+        for i in range(oLen):
+            # swap instructions maybe
+            if random.uniform(0,1) < pSwp:
+                idx1 = random.randint(0, len(self.instructions)-1)
                 idx2 = random.randint(0, len(self.instructions)-1)
+                while idx2 == idx1: # make sure different
+                    idx2 = random.randint(0, len(self.instructions)-1)
 
-            tmp = self.instructions[idx1]
-            self.instructions[idx1] = self.instructions[idx2]
-            self.instructions[idx2] = tmp
+                tmp = self.instructions[idx1]
+                self.instructions[idx1] = self.instructions[idx2]
+                self.instructions[idx2] = tmp
 
-            changed = True
+                changed = True
 
-        # mutate instruction maybe
-        if random.uniform(0,1) < pMut:
-            idx = random.randint(0, len(self.instructions)-1)
-            inst = bin(self.instructions[idx]) # get binary rep
-            # flip a random bit
-            bit = random.randint(2, len(inst)-1) # start at 2 for '0b' prefix
-            if inst[bit] == '0':
-                self.instructions[idx] = int(inst[:bit] + '1' + inst[bit+1:], 2)
-            else:
-                self.instructions[idx] = int(inst[:bit] + '0' + inst[bit+1:], 2)
+        # Mutating
+        for i in range(oLen):
+            # mutate instruction maybe
+            if random.uniform(0,1) < pMut:
+                idx = random.randint(0, len(self.instructions)-1)
+                inst = bin(self.instructions[idx]) # get binary rep
+                # flip a random bit
+                bit = random.randint(2, len(inst)-1) # start at 2 for '0b' prefix
+                if inst[bit] == '0':
+                    self.instructions[idx] = int(inst[:bit] + '1' + inst[bit+1:], 2)
+                else:
+                    self.instructions[idx] = int(inst[:bit] + '0' + inst[bit+1:], 2)
 
-            changed = True
+                changed = True
+
+        # Adding
+        for i in range(oLen):
+            # add random instruction maybe
+            if(len(self.instructions) < Program.maxProgSize and
+                    random.uniform(0,1) < pAdd):
+                self.instructions.insert(
+                    random.randint(0, len(self.instructions)-1),
+                    random.randint(0,2**sum(Program.instLengths)-1))
+
+                changed = True
 
         # update data
         self.extractInstructionsData()
