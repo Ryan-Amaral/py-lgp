@@ -26,24 +26,27 @@ class Trainer:
 
         self.initPop()
 
+        self.scoreStats = {}
+
     def initPop(self):
         self.programs = [Program(progSize=random.randint(1,Program.maxProgSize),
                                  genCreate=self.curGen)
                         for _ in range(self.popSize)]
 
     """
-    Returns all of the agents/programs. Sorted arbitrarilly unless tasks are
+    Returns all of the agents/programs. Sorted arbitrarilly unless sortTasks are
     specified (single or list). Type is how to deal with multiple tasks ('min',
-    'avg').
+    'avg'). skipTasks determine individuals to skip if all tasks have scores.
     """
-    def getAgents(self, tasks=None, type='min'):
-        if tasks is None: # just return all programs
+    def getAgents(self, sortTasks=None, type='min', skipTasks=[]):
+        if sortTasks is None: # just return all programs
             return list(self.programs)
         else: # sort based on fitnesses
-            if isinstance(tasks, str): # single task
-                return sorted(self.programs,
-                        key=lambda prg: prg.outcomes.get(tasks, None),
-                        reverse=True)
+            if isinstance(sortTasks, str): # single task
+                return [prog for prog in sorted(self.programs,
+                        key=lambda prg: prg.outcomes.get(sortTasks, None),
+                        reverse=True) if any(task not in prog.outcomes for task
+                        in skipTasks)]
             else: # multi task
                 pass # implement later when needed
 
@@ -58,6 +61,7 @@ class Trainer:
         return self.programs
 
     def evolve(self, tasks, fitType='min'):
+        self.getScoreStats(tasks)
         self.select(tasks, fitType)
         self.generate()
         self.curGen += 1
@@ -82,3 +86,16 @@ class Trainer:
             newProg.instructions = list(p.instructions)
             newProg.mutate()
             self.programs.append(newProg)
+
+    def getScoreStats(self, tasks):
+        scores = []
+        for prog in self.programs:
+            scores.append(prog.outcomes.get(tasks, None))
+
+        self.scoreStats = {}
+        self.scoreStats['scores'] = scores
+        self.scoreStats['min'] = min(scores)
+        self.scoreStats['max'] = max(scores)
+        self.scoreStats['average'] = sum(scores)/len(scores)
+
+        return self.scoreStats
