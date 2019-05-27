@@ -44,9 +44,9 @@ class Trainer:
         else: # sort based on fitnesses
             if isinstance(sortTasks, str): # single task
                 return [prog for prog in sorted(self.programs,
-                        key=lambda prg: prg.outcomes.get(sortTasks, None),
+                        key=lambda prg: prg.outcomes.get(sortTasks, -99999),
                         reverse=True) if any(task not in prog.outcomes for task
-                        in skipTasks)]
+                        in skipTasks) or len(skipTasks) == 0]
             else: # multi task
                 pass # implement later when needed
 
