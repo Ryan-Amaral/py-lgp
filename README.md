@@ -29,3 +29,7 @@ while True:
   bestProg = trainer.getAgents(sortTasks=taskName)[0] # to get top scoring program
 ```
 
+## More In-depth Better Usage
+With OpenAI Gym environment. Roboschool in this case, but others such as Atari can be used too,
+depending on program's `getAction` method.
+https://github.com/Ryan-Amaral/roboschool-ga/blob/master/run-lgp.py
