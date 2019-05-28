@@ -2,7 +2,7 @@ from setuptools import setup
 
 setup(
     name='py-lgp',
-    version='0.0',
+    version='0.3',
     packages=['lgp'],
     install_requires=['numba','numpy'],
     license='MIT',
