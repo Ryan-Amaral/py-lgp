@@ -2,7 +2,6 @@ import random
 import numpy as np
 from numba import njit
 import math
-import time
 
 """
 A program which contains multiple instructions, each of which performing some
@@ -66,19 +65,14 @@ class Program:
 
         self.fitness = None
 
-        sTime = time.time() # start time to keep sin numbers small
-
     """
     Produces an action based on the observation and state of registers.
     actionType 'single' returns the index of the max output register, 'multi'
-    returns all output registers. sync is whether to include the sin wave.
+    returns all output registers.
     """
-    def getAction(self, obs, actionType='multi', sync=False):
+    def getAction(self, obs, actionType='multi'):
         # reset fgt registers
         self.clearRegisters(clearAll=False)
-
-        if sync:
-            obs.append(math.sin((time.time()-sTime)*Program.syncSpeed))
 
         Program.run(obs, self.registers,
                 self.modes, self.ops, self.dests, self.srcs)

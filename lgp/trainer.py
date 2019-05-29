@@ -8,8 +8,7 @@ class Trainer:
 
     def __init__(self, numActions, popSize=200, gap=0.5, maxProgSize=128,
             numMemRegs=8, numFgtRegs=8,
-            pInstAdd=0.08, pInstDel=0.06, pInstSwp=0.05, pInstMut=0.05, pProgMut=1,
-            syncSpeed=0.5):
+            pInstAdd=0.08, pInstDel=0.06, pInstSwp=0.05, pInstMut=0.05, pProgMut=1):
 
         self.popSize = popSize
         self.gap = gap
@@ -22,7 +21,6 @@ class Trainer:
         Program.pInstDel = pInstDel
         Program.pInstSwp = pInstSwp
         Program.pInstMut = pInstMut
-        Program.syncSpeed = syncSpeed
 
         self.curGen = 0
 
