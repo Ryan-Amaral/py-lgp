@@ -163,6 +163,35 @@ class Program:
     def reward(self, task, score):
         self.outcomes[task] = score
 
+    """
+    Gets the score(s) of the program based on provided tasks. Types: 'min', 'max',
+    'avg', 'sum', 'multi'. minMaxs is a list the size of tasks in 2-tuples being
+    <min,max> of all program scores for each task.
+    """
+    def getScore(self, tasks, sType='min', minMaxs=None):
+        # just return single value
+        if isinstance(tasks, str) or len(tasks) == 1:
+            return self.outcomes[tasks]
+
+        outcomes = [self.outcomes[task] for task in tasks]
+
+        # normalize
+        if minMaxs is not None:
+            for i,mm in enumerate(minMaxs):
+                outcomes[i] = (outcomes[i]-mm[0])/(mm[1]-mm[0])
+
+        # return value as specified
+        if sType == 'min':
+            return min(outcomes)
+        elif sType == 'max':
+            return max(outcomes)
+        elif sType == 'avg':
+            return sum(outcomes)/len(outcomes)
+        elif sType == 'sum':
+            return sum(outcomes)
+        elif sType == 'multi':
+            return outcomes
+
     def extractInstructionsData(self): # for efficiency in running
         instsData = np.array([
             [
