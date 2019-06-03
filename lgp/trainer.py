@@ -61,7 +61,7 @@ class Trainer:
         if scoreType != 'pareto':
             return sorted(self.programs,
                     key=lambda prg:
-                           prg.getScore(tasks, sType=scoreType, minMax=minMaxs),
+                           prg.getScore(tasks, sType=scoreType, minMaxs=minMaxs),
                     reverse=reverse)
         else:
             pass

@@ -199,7 +199,7 @@ class Program:
         if isinstance(tasks, str):
             tasks = [tasks]
         # initial min maxs from fist individual
-        minMaxs = [(progs[0].outcomes[tsk], progs[0].outcomes[tsk])
+        minMaxs = [[progs[0].outcomes[tsk], progs[0].outcomes[tsk]]
                     for tsk in tasks]
 
         # update mins and maxs with program outcomes
