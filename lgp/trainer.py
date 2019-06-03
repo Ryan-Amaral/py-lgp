@@ -86,8 +86,8 @@ class Trainer:
             program.clearRegisters()
 
     def select(self, tasks, fitType, norm=True): # select programs to keep
-        numKeep = self.popSize - int(self.popSize * self.gap) # agents to keep
-        self.progsScorer(tasks, fitType, norm)[:numKeep]
+        numKeep = self.popSize - int(self.popSize * self.gap) # # agents to keep
+        self.programs = self.progsScorer(tasks, fitType, norm)[:numKeep]
 
     def generate(self): # generate new programs
         parents = list(self.programs)
