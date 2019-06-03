@@ -196,6 +196,8 @@ class Program:
     Get min and max scores among population for each task.
     """
     def getOverallMinMaxs(tasks, progs):
+        if isinstance(tasks, str):
+            tasks = [tasks]
         # initial min maxs from fist individual
         minMaxs = [(progs[0].outcomes[tsk], progs[0].outcomes[tsk])
                     for tsk in tasks]

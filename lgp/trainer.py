@@ -56,7 +56,7 @@ class Trainer:
         # get min and max of each task for normalizing
         minMaxs = None
         if norm:
-            minMaxs = Program.getOverallMinMaxs(sortTasks, self.programs)
+            minMaxs = Program.getOverallMinMaxs(tasks, self.programs)
 
         if scoreType != 'pareto':
             return sorted(self.programs,
