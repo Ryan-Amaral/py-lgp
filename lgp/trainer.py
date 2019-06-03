@@ -36,19 +36,29 @@ class Trainer:
     """
     Returns all of the agents/programs. Sorted arbitrarilly unless sortTasks are
     specified (single or list). Type is how to deal with multiple tasks ('min',
-    'avg'). skipTasks determine individuals to skip if all tasks have scores.
+    'max','avg','sum','pareto'). norm is whether to normalize scores, good for
+    pretty much all multiTask. skipTasks determine individuals to skip if all
+    tasks have scores.
     """
-    def getAgents(self, sortTasks=None, type='min', skipTasks=[]):
+    def getAgents(self, sortTasks=None, sType='min', norm=False, skipTasks=[]):
         if sortTasks is None: # just return all programs
             return list(self.programs)
-        else: # sort based on fitnesses
-            if isinstance(sortTasks, str): # single task
-                return [prog for prog in sorted(self.programs,
-                        key=lambda prg: prg.outcomes.get(sortTasks, -99999),
-                        reverse=True) if any(task not in prog.outcomes for task
-                        in skipTasks) or len(skipTasks) == 0]
-            else: # multi task
-                pass # implement later when needed
+
+        # get min and max of each task for normalizing
+        minMaxs = None
+        if norm:
+            minMaxs = Program.getOverallMinMaxs(sortTasks, self.programs)
+
+        if sType != 'pareto'
+            return [prog for prog in sorted(self.programs,
+                    key=lambda prg: prg.getScore(sortTasks, sType, minMaxs),
+                    reverse=True) if any(task not in prog.outcomes for task
+                    in skipTasks) or len(skipTasks) == 0]
+        else:
+            scores = [prog.getScore(sortTasks, sType, minMaxs)
+                        for prog in self.programs]
+            
+
 
     def applyScores(self, scores): # used when multiprocessing
         for score in scores:

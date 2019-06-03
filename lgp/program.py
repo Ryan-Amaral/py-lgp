@@ -165,7 +165,7 @@ class Program:
 
     """
     Gets the score(s) of the program based on provided tasks. Types: 'min', 'max',
-    'avg', 'sum', 'multi'. minMaxs is a list the size of tasks in 2-tuples being
+    'avg', 'sum', 'pareto'. minMaxs is a list the size of tasks in 2-tuples being
     <min,max> of all program scores for each task.
     """
     def getScore(self, tasks, sType='min', minMaxs=None):
@@ -189,8 +189,27 @@ class Program:
             return sum(outcomes)/len(outcomes)
         elif sType == 'sum':
             return sum(outcomes)
-        elif sType == 'multi':
+        elif sType == 'pareto':
             return outcomes
+
+    """
+    Get min and max scores among population for each task.
+    """
+    def getOverallMinMaxs(tasks, progs):
+        # initial min maxs from fist individual
+        minMaxs = [(progs[0].outcomes[tsk], progs[0].outcomes[tsk])
+                    for tsk in tasks]
+
+        # update mins and maxs with program outcomes
+        for prog in progs[1:]:
+            for i, task in enumerate(tasks):
+                cur = prog.outcomes[task]
+                if cur < minMaxs[i][0]:
+                    minMaxs[i][0] = cur
+                elif cur > minMaxs[i][1]:
+                    minMaxs[i][1] = cur
+
+        return minMaxs
 
     def extractInstructionsData(self): # for efficiency in running
         instsData = np.array([
