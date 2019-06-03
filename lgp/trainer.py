@@ -58,12 +58,12 @@ class Trainer:
         if norm:
             minMaxs = Program.getOverallMinMaxs(tasks, self.programs)
 
-        if scoreType != 'pareto':
+        if scoreType != 'pareto': # just return obtained score
             return sorted(self.programs,
                     key=lambda prg:
                            prg.getScore(tasks, sType=scoreType, minMaxs=minMaxs),
                     reverse=reverse)
-        else:
+        else: # score based on ranks of pareto fronts
             pass
 
 
