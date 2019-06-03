@@ -40,24 +40,31 @@ class Trainer:
     pretty much all multiTask. skipTasks determine individuals to skip if all
     tasks have scores.
     """
-    def getAgents(self, sortTasks=None, sType='min', norm=False, skipTasks=[]):
+    def getAgents(self, sortTasks=None, scoreType='min', norm=True, skipTasks=[]):
         if sortTasks is None: # just return all programs
             return list(self.programs)
 
+        return [prog for prog in self.progsScorer(sortTasks, scoreType, norm)
+                if any(task not in prog.outcomes for task in skipTasks)
+                    or len(skipTasks) == 0]
+
+    """
+    Wrapper around getting scores from program, for all programs, to clean up
+    calls from mess from pareto, getting minMaxs, etc. Sorted.
+    """
+    def progsScorer(self, tasks, scoreType, norm, reverse=True):
         # get min and max of each task for normalizing
         minMaxs = None
         if norm:
             minMaxs = Program.getOverallMinMaxs(sortTasks, self.programs)
 
-        if sType != 'pareto'
-            return [prog for prog in sorted(self.programs,
-                    key=lambda prg: prg.getScore(sortTasks, sType, minMaxs),
-                    reverse=True) if any(task not in prog.outcomes for task
-                    in skipTasks) or len(skipTasks) == 0]
+        if scoreType != 'pareto':
+            return sorted(self.programs,
+                    key=lambda prg:
+                           prg.getScore(tasks, sType=scoreType, minMax=minMaxs),
+                    reverse=reverse)
         else:
-            scores = [prog.getScore(sortTasks, sType, minMaxs)
-                        for prog in self.programs]
-            
+            pass
 
 
     def applyScores(self, scores): # used when multiprocessing
@@ -78,14 +85,9 @@ class Trainer:
         for program in self.programs:
             program.clearRegisters()
 
-    def select(self, tasks, fitType): # select programs to keep
+    def select(self, tasks, fitType, norm=True): # select programs to keep
         numKeep = self.popSize - int(self.popSize * self.gap) # agents to keep
-        if isinstance(tasks, str): # single task
-            self.programs = sorted(self.programs,
-                    key=lambda prg: prg.outcomes.get(tasks, None),
-                    reverse=True)[:numKeep]
-        else: # multi task
-            pass
+        self.progsScorer(tasks, fitType, norm)[:numKeep]
 
     def generate(self): # generate new programs
         parents = list(self.programs)
