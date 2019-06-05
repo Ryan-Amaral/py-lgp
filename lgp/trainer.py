@@ -1,6 +1,6 @@
 import random
 from lgp.program import Program
-from util import pareto1
+from lgp.util import pareto1
 
 """
 Creates and maintains a population of programs.
