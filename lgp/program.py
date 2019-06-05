@@ -178,7 +178,10 @@ class Program:
         # normalize
         if minMaxs is not None:
             for i,mm in enumerate(minMaxs):
-                outcomes[i] = (outcomes[i]-mm[0])/(mm[1]-mm[0])
+                try:
+                    outcomes[i] = (outcomes[i]-mm[0])/(mm[1]-mm[0])
+                except:
+                    outcomes[i] = 0
 
         # return value as specified
         if sType == 'min':
