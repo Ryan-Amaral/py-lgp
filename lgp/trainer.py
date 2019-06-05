@@ -39,19 +39,20 @@ class Trainer:
     specified (single or list). Type is how to deal with multiple tasks ('min',
     'max','avg','sum','pareto'). norm is whether to normalize scores, good for
     pretty much all multiTask. skipTasks determine individuals to skip if all
-    tasks have scores.
+    tasks have scores. If byFitness, then uses just stored fitness on agents.
     """
     def getAgents(self, sortTasks=None, scoreType='min', norm=True, skipTasks=[]):
         if sortTasks is None: # just return all programs
             return list(self.programs)
-
-        return [prog for prog in self.progsScorer(sortTasks, scoreType, norm)
-                if any(task not in prog.outcomes for task in skipTasks)
-                    or len(skipTasks) == 0]
+        else: # return sorted by new ranking
+            return [prog for prog in self.progsScorer(sortTasks, scoreType, norm)
+                    if any(task not in prog.outcomes for task in skipTasks)
+                        or len(skipTasks) == 0]
 
     """
     Wrapper around getting scores from program, for all programs, to clean up
-    calls from mess from pareto, getting minMaxs, etc. Sorted.
+    calls from mess from pareto, getting minMaxs, etc. Sorted. If saveFitness,
+    stores the score in fitness variable of program.
     """
     def progsScorer(self, tasks, scoreType, norm, reverse=True):
         # get min and max of each task for normalizing
@@ -64,9 +65,10 @@ class Trainer:
                     key=lambda prg:
                            prg.getScore(tasks, sType=scoreType, minMaxs=minMaxs),
                     reverse=reverse)
-        else: # score based on ranks of pareto ranks
-            return pareto1(self.programs, [prg.getScore(tasks, sType=scoreType,
-                                            minMaxs=minMaxs)], reverse=reverse)
+        else: # score based pareto front type stuff
+            return pareto1(self.programs,
+                            [prg.getScore(tasks, sType=scoreType, minMaxs=minMaxs)
+                                for prg in self.programs], reverse=reverse)
 
 
     def applyScores(self, scores): # used when multiprocessing
