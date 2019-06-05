@@ -1,5 +1,6 @@
 import random
 from lgp.program import Program
+from util import pareto1
 
 """
 Creates and maintains a population of programs.
@@ -63,8 +64,9 @@ class Trainer:
                     key=lambda prg:
                            prg.getScore(tasks, sType=scoreType, minMaxs=minMaxs),
                     reverse=reverse)
-        else: # score based on ranks of pareto fronts
-            pass
+        else: # score based on ranks of pareto ranks
+            return pareto1(self.programs, [prg.getScore(tasks, sType=scoreType,
+                                            minMaxs=minMaxs)], reverse=reverse)
 
 
     def applyScores(self, scores): # used when multiprocessing
