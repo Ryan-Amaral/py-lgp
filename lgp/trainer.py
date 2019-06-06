@@ -104,6 +104,8 @@ class Trainer:
             self.programs.append(newProg)
 
     def getScoreStats(self, tasks):
+        if not isinstance(tasks, str):
+            tasks = tasks[0] # deal with multi task reporting later
         scores = []
         for prog in self.programs:
             scores.append(prog.outcomes.get(tasks, None))
