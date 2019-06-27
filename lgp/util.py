@@ -12,7 +12,7 @@ def pareto1(agents, scores, reverse=True):
             if i == j:
                 continue # don't compare to self
             if all([scores[i][k] >= scores[j][k]
-                     for k in range(len(scores[i]))])]):
+                     for k in range(len(scores[i]))]):
                 ap += 1
         agentPoints.append((agents[i], ap))
 
