@@ -82,7 +82,7 @@ class Trainer:
         return self.programs
 
     def evolve(self, tasks, fitType='min'):
-        #self.getScoreStats(tasks)
+        self.getScoreStats(tasks)
         self.select(tasks, fitType)
         self.generate()
         self.curGen += 1
