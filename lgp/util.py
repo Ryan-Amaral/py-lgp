@@ -4,10 +4,9 @@ import pickle
 from lgp.program import Program
 
 """
-Takes in agents and scores, and returns the agents sorted descending based on
-pareto points.
+Rank agents based on how many other agents they dominate.
 """
-def pareto1(agents, scores, reverse=True):
+def paretoDominate(agents, scores, reverse=True):
     agentPoints = []
     for i in range(len(agents)):
         ap = 0
@@ -22,6 +21,8 @@ def pareto1(agents, scores, reverse=True):
     agentPoints.sort(key=itemgetter(1), reverse=reverse)
 
     return [ap[0] for ap in agentPoints]
+
+
 
 def saveProgram(fileName, program):
     # save class variables to program instance, to be loaded back.
