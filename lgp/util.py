@@ -22,7 +22,24 @@ def paretoDominate(agents, scores, reverse=True):
 
     return [ap[0] for ap in agentPoints]
 
+"""
+Rank agents based on how many other agents don't dominate it
+"""
+def paretoNonDominated(agents, scores, reverse=True):
+    agentPoints = []
+    for i in range(len(agents)):
+        ap = 0
+        for j in range(len(agents)):
+            if i == j:
+                continue # don't compare to self
+            if all([scores[i][k] < scores[j][k]
+                     for k in range(len(scores[i]))]):
+                ap -= 1
+        agentPoints.append((agents[i], ap))
 
+    agentPoints.sort(key=itemgetter(1), reverse=reverse)
+
+    return [ap[0] for ap in agentPoints]
 
 def saveProgram(fileName, program):
     # save class variables to program instance, to be loaded back.

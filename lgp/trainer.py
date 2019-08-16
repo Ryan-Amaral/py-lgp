@@ -37,9 +37,10 @@ class Trainer:
     """
     Returns all of the agents/programs. Sorted arbitrarilly unless sortTasks are
     specified (single or list). Type is how to deal with multiple tasks ('min',
-    'max','avg','sum','paretoDominate'). norm is whether to normalize scores, good for
-    pretty much all multiTask. skipTasks determine individuals to skip if all
-    tasks have scores. If byFitness, then uses just stored fitness on agents.
+    'max','avg','sum','paretoDominate','paretoNonDominated'). norm is whether to
+    normalize scores, good for pretty much all multiTask. skipTasks determine
+    individuals to skip if all tasks have scores. If byFitness, then uses just
+    stored fitness on agents.
     """
     def getAgents(self, sortTasks=None, scoreType='min', norm=True, skipTasks=[]):
         if sortTasks is None: # just return all programs
@@ -68,6 +69,10 @@ class Trainer:
         else: # score based pareto front type stuff
             if scoreType == 'paretoDominate':
                 return paretoDominate(self.programs,
+                        [prg.getScore(tasks, sType=scoreType, minMaxs=minMaxs)
+                                for prg in self.programs], reverse=reverse)
+            elif scoreType == 'paretoNonDominated':
+                return paretoNonDominated(self.programs,
                         [prg.getScore(tasks, sType=scoreType, minMaxs=minMaxs)
                                 for prg in self.programs], reverse=reverse)
 
