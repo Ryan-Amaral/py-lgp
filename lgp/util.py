@@ -56,7 +56,7 @@ def saveProgram(fileName, program):
 
     pickle.dump(program, open(fileName, 'wb'))
 
-def loadProgram(FileName):
+def loadProgram(fileName):
     program = pickle.load(open(fileName), 'rb')
 
     # load class variables back
