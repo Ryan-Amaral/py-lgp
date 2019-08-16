@@ -57,7 +57,7 @@ def saveProgram(fileName, program):
     pickle.dump(program, open(fileName, 'wb'))
 
 def loadProgram(fileName):
-    program = pickle.load(open(fileName), 'rb')
+    program = pickle.load(open(fileName, 'rb'))
 
     # load class variables back
     Program.maxProgSize = program.maxProgSize
