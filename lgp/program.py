@@ -192,7 +192,7 @@ class Program:
             return sum(outcomes)/len(outcomes)
         elif sType == 'sum':
             return sum(outcomes)
-    elif 'pareto' in sType:
+        elif 'pareto' in sType:
             return outcomes
 
     """
