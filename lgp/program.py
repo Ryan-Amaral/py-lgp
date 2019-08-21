@@ -170,8 +170,8 @@ class Program:
     """
     def getScore(self, tasks, sType='min', minMaxs=None):
         # just return single value
-        if isinstance(tasks, str) or len(tasks) == 1:
-            return self.outcomes[tasks]
+        if len(tasks) == 1:
+            return self.outcomes[tasks[0]]
 
         outcomes = [self.outcomes[task] for task in tasks]
 
