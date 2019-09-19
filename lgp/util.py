@@ -2,6 +2,7 @@ from operator import itemgetter
 import pickle
 #from lgp.trainer import Trainer
 from lgp.program import Program
+from lgp.team import Team
 
 """
 Rank agents based on how many other agents they dominate.
@@ -104,3 +105,39 @@ def loadTrainer(fileName):
     Program.instLengths = list(trainer.instLengths)
 
     return trainer
+
+def saveTeam(fileName, team):
+    # save class variables to program instance, to be loaded back.
+    team.ProgmaxProgSize = Program.maxProgSize
+    team.numOutRegs = Program.numOutRegs
+    team.numMemRegs = Program.numMemRegs
+    team.numFgtRegs = Program.numFgtRegs
+    team.pInstAdd = Program.pInstAdd
+    team.pInstDel = Program.pInstDel
+    team.pInstSwp = Program.pInstSwp
+    team.pInstMut = Program.pInstMut
+    team.idCount = Program.idCount
+    team.instLengths = list(Program.instLengths)
+    team.tIdCount = Team.idCount
+
+    pickle.dump(team, open(fileName, 'wb'))
+
+def loadTeam(fileName):
+    team = pickle.load(open(fileName, 'rb'))
+
+    # load class variables back
+    Program.maxProgSize = team.maxProgSize
+    Program.numOutRegs = team.numOutRegs
+    Program.numMemRegs = team.numMemRegs
+    Program.numFgtRegs = team.numFgtRegs
+    Program.pInstAdd = team.pInstAdd
+    Program.pInstDel = team.pInstDel
+    Program.pInstSwp = team.pInstSwp
+    Program.pInstMut = team.pInstMut
+    Program.idCount = team.idCount
+    Program.instLengths = list(team.instLengths)
+    Team.idCount = team.tIdCount
+
+    return team
+
+# implement teamTrainer load/save
