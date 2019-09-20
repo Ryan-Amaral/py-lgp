@@ -117,7 +117,7 @@ class Program:
         # Swapping
         for i in range(oLen):
             # swap instructions maybe
-            if random.uniform(0,1) < pSwp:
+            if random.uniform(0,1) < pSwp and len(self.instructions) >= 2:
                 idx1 = random.randint(0, len(self.instructions)-1)
                 idx2 = random.randint(0, len(self.instructions)-1)
                 while idx2 == idx1: # make sure different
